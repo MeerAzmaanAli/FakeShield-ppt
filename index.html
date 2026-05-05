@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FakeShield — The Fake Account Crisis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --warm: #ede7d9;
+    --dark: #1a1612;
+    --vermillion: #c0392b;
+    --vermillion-light: #e8453c;
+    --gold: #b8860b;
+    --gray: #7a756e;
+    --gray-light: #c4bdb2;
+    --border: #d4cbbf;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', 'Noto Serif', serif;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 2px; background: var(--vermillion);
+    z-index: 1000; transition: width 0.1s; width: 0%;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-family: var(--mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+  .nav-brand span { color: var(--vermillion); }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* HERO - dark ink background */
+  #hero {
+    min-height: 100vh;
+    background: var(--dark);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 4rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,240,232,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,240,232,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .hero-vline {
+    position: absolute; top: 0; left: 4rem;
+    width: 1px; height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(192,57,43,0.4) 30%, rgba(192,57,43,0.4) 70%, transparent);
+    animation: lineFade 4s ease-in-out infinite;
+  }
+  @keyframes lineFade {
+    0%,100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .hero-eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--vermillion); margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; }
+  .hero-title { font-family: var(--serif); font-size: clamp(3.5rem, 8vw, 8rem); font-weight: 300; line-height: 0.95; letter-spacing: -0.03em; color: var(--paper); opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
+  .hero-title em { font-style: italic; color: var(--vermillion); display: block; }
+  .hero-subtitle { margin-top: 2rem; font-size: 1.1rem; font-weight: 300; color: var(--gray-light); max-width: 600px; opacity: 0; animation: fadeUp 0.8s 0.6s forwards; }
+  .hero-subtitle em { color: var(--paper); font-style: normal; }
+  .hero-meta { margin-top: 3rem; font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,240,232,0.3); opacity: 0; animation: fadeUp 0.8s 0.8s forwards; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex; align-items: center; gap: 2rem;
+    margin: 0 4rem;
+    padding: 4rem 0 3rem;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gray-light); white-space: nowrap; }
+  .divider-num { font-family: var(--serif); font-size: 0.9rem; color: var(--vermillion); font-style: italic; }
+
+  section {
+    padding: 6rem 4rem;
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--vermillion); margin-bottom: 1rem; }
+  .section-title { font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.8rem); font-weight: 300; line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 3rem; }
+  .section-title em { font-style: italic; color: var(--vermillion); }
+
+  /* SCALE STATS */
+  .scale-hero {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+    overflow: hidden;
+  }
+  .scale-cell {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .scale-cell:last-child { border-right: none; }
+  .scale-cell.dark-cell {
+    background: var(--dark);
+  }
+  .scale-cell.dark-cell .scale-num { color: var(--paper); }
+  .scale-cell.dark-cell .scale-lbl { color: var(--gray-light); }
+  .scale-num { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 300; font-style: italic; color: var(--ink); line-height: 1; }
+  .scale-lbl { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray); margin-top: 0.5rem; line-height: 1.5; }
+  .scale-bar {
+    position: absolute; bottom: 0; left: 0;
+    height: 3px; width: 0;
+    background: var(--vermillion);
+    transition: width 1.2s ease;
+  }
+  .scale-cell.visible .scale-bar { width: 100%; }
+
+  /* PLATFORM TABLE */
+  .platform-table {
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .platform-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .platform-row:last-child { border-bottom: none; }
+  .platform-row:hover { background: var(--warm); }
+  .platform-name { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; color: var(--ink); }
+  .platform-count { font-family: var(--mono); font-size: 0.8rem; color: var(--vermillion); letter-spacing: 0.05em; }
+  .platform-bar-bg { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--border); width: 100%; }
+  .platform-bar-fill { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--vermillion); width: 0; transition: width 1s ease; }
+  .platform-row.visible .platform-bar-fill.fb { width: 82%; }
+  .platform-row.visible .platform-bar-fill.ig { width: 62%; }
+  .platform-row.visible .platform-bar-fill.tw { width: 48%; }
+  .platform-row.visible .platform-bar-fill.li { width: 35%; }
+
+  /* PROBLEM DEFINITION */
+  .core-statement {
+    padding: 2.5rem;
+    border-left: 3px solid var(--vermillion);
+    background: var(--warm);
+    margin-bottom: 3rem;
+  }
+  .core-statement p { font-family: var(--serif); font-size: 1.2rem; font-weight: 300; color: var(--ink); line-height: 1.7; }
+  .core-statement strong { font-weight: 600; color: var(--vermillion); font-style: italic; }
+
+  .problem-cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .pcol {
+    background: var(--paper);
+    padding: 2rem 1.5rem;
+    transition: background 0.3s;
+  }
+  .pcol:hover { background: var(--dark); }
+  .pcol:hover .pcol-title { color: var(--paper); }
+  .pcol:hover .pcol-items li { color: var(--gray-light); }
+  .pcol:hover .pcol-items li::before { color: var(--vermillion-light); }
+  .pcol-title { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; margin-bottom: 1rem; color: var(--ink); transition: color 0.3s; }
+  .pcol-items { list-style: none; }
+  .pcol-items li { font-family: var(--mono); font-size: 0.7rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); color: var(--gray); transition: color 0.3s; }
+  .pcol-items li:last-child { border-bottom: none; }
+  .pcol-items li::before { content: '▸ '; color: var(--vermillion); transition: color 0.3s; }
+
+  /* PAIN POINTS */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .pain-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .pain-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--vermillion);
+    transition: height 0.6s ease;
+  }
+  .pain-card.visible::before { height: 100%; }
+  .pain-who { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--vermillion); margin-bottom: 1rem; }
+  .pain-list { list-style: none; }
+  .pain-list li { font-size: 0.9rem; font-weight: 300; color: var(--gray); padding: 0.35rem 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .pain-list li:last-child { border-bottom: none; }
+  .pain-list li::before { content: '– '; color: var(--gray-light); }
+
+  /* EXISTING SYSTEMS TABLE */
+  .systems-table {
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .systems-header {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 2fr;
+    background: var(--dark);
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+  }
+  .systems-header span { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-light); }
+  .systems-row {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr 2fr;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+    align-items: start;
+    transition: background 0.2s;
+  }
+  .systems-row:last-child { border-bottom: none; }
+  .systems-row:hover { background: var(--warm); }
+  .sys-name { font-family: var(--serif); font-size: 0.95rem; font-weight: 400; color: var(--ink); }
+  .sys-approach { font-size: 0.85rem; font-weight: 300; color: var(--gray); line-height: 1.5; }
+  .sys-fail { font-size: 0.85rem; font-weight: 300; color: var(--vermillion); line-height: 1.5; }
+  .warn { font-family: var(--mono); font-size: 0.65rem; color: var(--vermillion); margin-right: 0.4rem; }
+
+  /* COMPARISON TABLE */
+  .compare-table {
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 4rem;
+  }
+  .compare-header {
+    display: grid;
+    grid-template-columns: 1.5fr 1.5fr 1.5fr;
+    background: var(--ink);
+  }
+  .compare-header span {
+    padding: 1rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    border-right: 1px solid rgba(255,255,255,0.08);
+  }
+  .compare-header span:last-child { border-right: none; }
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1.5fr 1.5fr;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row:hover { background: var(--warm); }
+  .compare-row > div {
+    padding: 1rem 1.5rem;
+    font-size: 0.88rem;
+    font-weight: 300;
+    border-right: 1px solid var(--border);
+    line-height: 1.5;
+  }
+  .compare-row > div:last-child { border-right: none; }
+  .compare-row > div:first-child { font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray); display: flex; align-items: center; }
+  .bad { color: var(--gray); }
+  .good { color: var(--ink); }
+  .bad::before { content: '✗  '; color: var(--gray-light); font-family: var(--mono); }
+  .good::before { content: '✓  '; color: var(--vermillion); font-family: var(--mono); }
+
+  /* VISION */
+  .mission-block {
+    padding: 3rem;
+    background: var(--dark);
+    border: 1px solid var(--ink);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .mission-block::after {
+    content: '"';
+    position: absolute; right: 2rem; bottom: -1rem;
+    font-family: var(--serif);
+    font-size: 12rem;
+    color: rgba(192,57,43,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .mission-text { font-family: var(--serif); font-size: 1.3rem; font-weight: 300; color: var(--paper); line-height: 1.6; position: relative; z-index: 1; }
+  .mission-text em { color: var(--vermillion-light); font-style: italic; }
+
+  .vision-cols {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .vision-card {
+    padding: 2rem 1.5rem;
+    border: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s, transform 0.5s, border-color 0.3s;
+  }
+  .vision-card.visible { opacity: 1; transform: translateY(0); }
+  .vision-card:hover { border-color: var(--vermillion); }
+  .vision-icon { font-size: 1.5rem; margin-bottom: 1rem; }
+  .vision-title { font-family: var(--serif); font-size: 1rem; font-weight: 400; color: var(--ink); margin-bottom: 0.6rem; }
+  .vision-desc { font-size: 0.85rem; font-weight: 300; color: var(--gray); line-height: 1.6; }
+
+  /* GAP */
+  .gap-layout {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    align-items: stretch;
+  }
+  .gap-col { padding: 2.5rem 2rem; }
+  .gap-col.current { background: var(--warm); }
+  .gap-col.solution { background: var(--dark); }
+  .gap-col.solution .gap-title { color: var(--paper); }
+  .gap-col.solution .gap-item { color: var(--gray-light); border-color: rgba(255,255,255,0.08); }
+  .gap-col.solution .gap-item::before { color: var(--vermillion-light); }
+  .gap-arrow {
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+    background: var(--ink);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .gap-arrow-inner {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--vermillion);
+    writing-mode: vertical-rl;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: arrowPulseV 2s ease-in-out infinite;
+  }
+  @keyframes arrowPulseV {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .gap-title { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray); margin-bottom: 1.5rem; }
+  .gap-item { font-size: 0.9rem; font-weight: 300; color: var(--gray); padding: 0.5rem 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+  .gap-item:last-child { border-bottom: none; }
+  .gap-item::before { content: '✗  '; color: var(--gray-light); font-family: var(--mono); font-size: 0.75rem; }
+  .gap-col.solution .gap-item::before { content: '✓  '; }
+
+  .closing-line {
+    text-align: center;
+    margin-top: 4rem;
+    padding: 3rem 4rem;
+    border-top: 1px solid var(--border);
+  }
+  .closing-line p { font-family: var(--serif); font-size: 1.5rem; font-weight: 300; font-style: italic; color: var(--ink); }
+  .closing-line em { color: var(--vermillion); font-style: normal; font-weight: 400; }
+
+  footer {
+    padding: 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+    background: var(--dark);
+  }
+  .footer-brand { font-family: var(--serif); font-size: 2rem; font-weight: 300; font-style: italic; color: var(--paper); }
+  .footer-brand em { color: var(--vermillion); font-style: normal; }
+  .footer-meta { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; color: var(--gray); text-align: right; line-height: 2; }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero, section { padding: 4rem 1.5rem; }
+    .scale-hero, .problem-cols, .pain-grid, .vision-cols { grid-template-columns: 1fr; }
+    .systems-header, .systems-row { grid-template-columns: 1fr; }
+    .compare-header, .compare-row { grid-template-columns: 1fr; }
+    .gap-layout { grid-template-columns: 1fr; }
+    .gap-arrow { padding: 1rem; writing-mode: horizontal-tb; }
+    .gap-arrow-inner { writing-mode: horizontal-tb; }
+    footer { flex-direction: column; gap: 2rem; }
+    .footer-meta { text-align: left; }
+    .divider { margin: 0 1.5rem; }
+  }
+</style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --warm: #ede7d9;
+    --vermillion: #c0392b;
+    --vermillion-light: #e8453c;
+    --gold: #b8860b;
+    --gray: #7a756e;
+    --gray-light: #c4bdb2;
+    --border: #d4cbbf;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', 'Noto Serif', serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: var(--vermillion);
+    z-index: 1000;
+    transition: width 0.1s;
+    width: 0%;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-brand span { color: var(--vermillion); }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 4rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--serif);
+    font-size: clamp(12rem, 22vw, 28rem);
+    font-weight: 700;
+    color: rgba(15,14,12,0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+    animation: floatBg 8s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes floatBg {
+    0%,100% { transform: translate(-50%,-50%) scale(1); }
+    50% { transform: translate(-50%,-52%) scale(1.01); }
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(4rem, 9vw, 9rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--vermillion);
+  }
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--gray);
+    max-width: 520px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+  .hero-tags {
+    margin-top: 3rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    background: transparent;
+  }
+  .tag.accent { border-color: var(--vermillion); color: var(--vermillion); }
+
+  .hero-scroll {
+    position: absolute; bottom: 3rem; right: 4rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--gray-light), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.4; transform: scaleY(0.6); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    display: flex; align-items: center; gap: 2rem;
+    margin: 0 4rem;
+    padding: 4rem 0 3rem;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    white-space: nowrap;
+  }
+  .divider-num {
+    font-family: var(--serif);
+    font-size: 0.9rem;
+    color: var(--vermillion);
+    font-style: italic;
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 6rem 4rem;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 3rem;
+  }
+  .section-title em { font-style: italic; color: var(--vermillion); }
+
+  /* ─── PROBLEM STATS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+    overflow: hidden;
+  }
+  .stat-cell {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-cell::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px;
+    background: var(--vermillion);
+    transition: width 1s ease;
+  }
+  .stat-cell.visible::after { width: 100%; }
+  .stat-num {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    font-style: italic;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .problem-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .problem-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    background: var(--warm);
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .problem-card:hover {
+    border-color: var(--vermillion);
+    box-shadow: 4px 4px 0 var(--vermillion);
+    transform: translate(-2px, -2px);
+    transition: all 0.2s;
+  }
+  .problem-card h3 {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .problem-card p {
+    font-size: 0.95rem;
+    color: var(--gray);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .card-index {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--vermillion);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  /* ─── SOLUTION ─── */
+  .solution-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .solution-col {
+    background: var(--paper);
+    padding: 2.5rem 2rem;
+    position: relative;
+  }
+  .sol-icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--vermillion);
+    font-size: 1rem;
+  }
+  .sol-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  .sol-steps {
+    list-style: none;
+    font-size: 0.9rem;
+    color: var(--gray);
+    font-weight: 300;
+    font-family: var(--mono);
+  }
+  .sol-steps li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .sol-steps li:last-child { border-bottom: none; }
+  .sol-steps li::before {
+    content: '→ ';
+    color: var(--vermillion);
+  }
+
+  /* ─── ARCHITECTURE FLOW ─── */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow: hidden;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+    row-gap: 2rem;
+  }
+  .arch-node {
+    flex: 1;
+    min-width: 120px;
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    background: var(--paper);
+    position: relative;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .arch-node:hover {
+    background: var(--warm);
+    border-color: var(--ink);
+  }
+  .arch-node.highlight {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .arch-node.highlight .node-label { color: var(--paper); }
+  .arch-node.highlight .node-sub { color: var(--gray-light); }
+  .node-icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .node-label {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .node-sub {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    margin-top: 0.25rem;
+  }
+  .arch-arrow {
+    font-family: var(--mono);
+    color: var(--vermillion);
+    font-size: 1.2rem;
+    padding: 0 0.5rem;
+    flex-shrink: 0;
+    animation: arrowPulse 2s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%,100% { opacity: 1; transform: translateX(0); }
+    50% { opacity: 0.5; transform: translateX(4px); }
+  }
+
+  .tech-stack {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .tech-item {
+    padding: 1.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .tech-item:hover { background: var(--warm); }
+  .tech-item:nth-child(4n) { border-right: none; }
+  .tech-item:nth-last-child(-n+4) { border-bottom: none; }
+  .tech-cat {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 0.5rem;
+  }
+  .tech-name {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+  .tech-detail {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--gray);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+  }
+
+  /* ─── ML FEATURES ─── */
+  .features-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .feature-list { list-style: none; }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .feature-item.visible { opacity: 1; transform: translateX(0); }
+  .feature-check {
+    color: var(--vermillion);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+  .feature-text {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+
+  /* ─── METRICS ─── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .metric-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 100%;
+    height: 0;
+    background: var(--ink);
+    transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  .metric-card.animate::before { height: 100%; }
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+    position: relative; z-index: 1;
+    transition: color 1s;
+    display: block;
+  }
+  .metric-card.animate .metric-value { color: var(--paper); }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    position: relative; z-index: 1;
+    transition: color 1s;
+  }
+  .metric-card.animate .metric-label { color: var(--gray-light); }
+
+  .risk-labels {
+    display: flex;
+    gap: 0;
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .risk-tag {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-right: 1px solid var(--border);
+  }
+  .risk-tag:last-child { border-right: none; }
+  .risk-tag.low { background: rgba(46,125,50,0.08); color: #2e7d32; }
+  .risk-tag.mid { background: rgba(184,134,11,0.08); color: var(--gold); }
+  .risk-tag.high { background: rgba(192,57,43,0.08); color: var(--vermillion); }
+
+  /* ─── BLOCKCHAIN ─── */
+  .blockchain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .bc-cell {
+    background: var(--paper);
+    padding: 2.5rem 2rem;
+    transition: background 0.3s;
+  }
+  .bc-cell:hover { background: var(--warm); }
+  .bc-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .bc-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+  .bc-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+
+  /* ─── WORKFLOW ─── */
+  .workflow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .wf-step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .wf-step:last-child { border-bottom: none; }
+  .wf-num {
+    background: var(--warm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--border);
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .wf-num::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 3px;
+    background: var(--vermillion);
+    transition: width 0.8s ease;
+  }
+  .wf-step.visible .wf-num::after { width: 100%; }
+  .wf-content {
+    padding: 1.5rem 2rem;
+    background: var(--paper);
+    transition: background 0.2s;
+  }
+  .wf-step:hover .wf-content { background: var(--warm); }
+  .wf-title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .wf-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+  }
+
+  .features-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-top: 3rem;
+  }
+
+  /* ─── IMPACT ─── */
+  .impact-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+    overflow: hidden;
+  }
+  .impact-col {
+    background: var(--paper);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+  .impact-col:hover { background: var(--ink); }
+  .impact-col:hover .impact-title { color: var(--paper); }
+  .impact-col:hover .impact-desc { color: var(--gray-light); }
+  .impact-col:hover .impact-icon { color: var(--vermillion-light); }
+  .impact-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    transition: color 0.3s;
+  }
+  .impact-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    transition: color 0.3s;
+  }
+  .impact-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+    transition: color 0.3s;
+  }
+
+  .conclusion-list { list-style: none; margin-top: 2rem; }
+  .conclusion-item {
+    display: flex; gap: 1.5rem; align-items: flex-start;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .conclusion-item.visible { opacity: 1; transform: translateY(0); }
+  .conclusion-item span:first-child {
+    color: var(--vermillion);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .footer-brand {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .footer-brand em { color: var(--vermillion); font-style: normal; }
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gray-light);
+    text-align: right;
+    line-height: 2;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero, section { padding: 4rem 1.5rem; }
+    .stats-grid, .problem-cards, .solution-grid, .features-layout,
+    .metrics-grid, .blockchain-grid, .impact-row, .tech-stack { grid-template-columns: 1fr; }
+    .arch-flow { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); }
+    footer { flex-direction: column; gap: 2rem; }
+    .footer-meta { text-align: left; }
+    .divider { margin: 0 1.5rem; }
+  }
+</head>
+<body>
+<div id="progress"></div>
+
+<nav>
+  <a class="nav-brand" href="#hero">Fake<span>Shield</span></a>
+  <div class="nav-links">
+    <a href="#scale">Scale</a>
+    <a href="#definition">Definition</a>
+    <a href="#pain">Pain Points</a>
+    <a href="#existing">Existing Systems</a>
+    <a href="#differentiator">Differentiator</a>
+    <a href="#vision">Vision</a>
+    <a href="#gap">The Gap</a>
+  </div>
+</nav>
+
+<!-- HERO - dark -->
+<section id="hero" style="opacity:1;transform:none;padding-bottom:6rem;">
+  <div class="hero-grid-lines"></div>
+  <div class="hero-vline"></div>
+  <div class="hero-eyebrow">Problem Definition · Pain Points · Why Existing Systems Fail</div>
+  <h1 class="hero-title">The Fake<br/><em>Account Crisis</em></h1>
+  <p class="hero-subtitle">
+    Fake accounts aren't a minor nuisance — they're a <em>systemic threat</em> to democracy, commerce, and trust. And no one is accountable.
+  </p>
+  <div class="hero-meta">FakeShield · Minor Project · Fake Account Detection System</div>
+</section>
+
+<!-- SCALE -->
+<div class="divider">
+  <div class="divider-num">01</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Scale of the Problem</div>
+</div>
+
+<section id="scale">
+  <div class="section-label">The Numbers</div>
+  <h2 class="section-title">A systemic threat,<br/>at <em>planetary scale</em></h2>
+
+  <div class="scale-hero">
+    <div class="scale-cell" id="sc1">
+      <div class="scale-bar"></div>
+      <div class="scale-num">1.4B</div>
+      <div class="scale-lbl">Fake accounts removed<br/>by Meta in 2023 alone</div>
+    </div>
+    <div class="scale-cell" id="sc2">
+      <div class="scale-bar"></div>
+      <div class="scale-num">15–20%</div>
+      <div class="scale-lbl">Of all social media<br/>accounts are fake or bots</div>
+    </div>
+    <div class="scale-cell dark-cell" id="sc3">
+      <div class="scale-bar"></div>
+      <div class="scale-num">$1.3B</div>
+      <div class="scale-lbl">Annual ad spend<br/>wasted on bot traffic</div>
+    </div>
+    <div class="scale-cell" id="sc4">
+      <div class="scale-bar"></div>
+      <div class="scale-num">0</div>
+      <div class="scale-lbl">Centralized government<br/>reporting mechanism exists</div>
+    </div>
+  </div>
+
+  <div class="platform-table">
+    <div class="platform-row" id="pr1">
+      <div class="platform-name">Facebook / Meta</div>
+      <div class="platform-count">82M+ fake accounts</div>
+      <div class="platform-bar-bg"></div>
+      <div class="platform-bar-fill fb"></div>
+    </div>
+    <div class="platform-row" id="pr2">
+      <div class="platform-name">Instagram</div>
+      <div class="platform-count">62M+ fake accounts</div>
+      <div class="platform-bar-bg"></div>
+      <div class="platform-bar-fill ig"></div>
+    </div>
+    <div class="platform-row" id="pr3">
+      <div class="platform-name">Twitter / X</div>
+      <div class="platform-count">48M+ fake accounts</div>
+      <div class="platform-bar-bg"></div>
+      <div class="platform-bar-fill tw"></div>
+    </div>
+    <div class="platform-row" id="pr4">
+      <div class="platform-name">LinkedIn</div>
+      <div class="platform-count">35M+ fake accounts</div>
+      <div class="platform-bar-bg"></div>
+      <div class="platform-bar-fill li"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DEFINITION -->
+<div class="divider">
+  <div class="divider-num">02</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Problem Definition</div>
+</div>
+
+<section id="definition">
+  <div class="section-label">Core Problem</div>
+  <h2 class="section-title">Unethical manipulation,<br/><em>zero external check</em></h2>
+
+  <div class="core-statement">
+    <p>Social media platforms are infested with fake and bot accounts used for <strong>unethical manipulation</strong> — and no external, transparent, or government-backed mechanism exists to identify, report, or act on them.</p>
+  </div>
+
+  <div class="problem-cols">
+    <div class="pcol">
+      <div class="pcol-title">Automated Bot Activity</div>
+      <ul class="pcol-items">
+        <li>Bots mimic human behavior at scale</li>
+        <li>Used to fake follower counts & trends</li>
+        <li>Operate in coordinated botnets</li>
+        <li>Evade basic rate-limit checks easily</li>
+      </ul>
+    </div>
+    <div class="pcol">
+      <div class="pcol-title">Identity Deception</div>
+      <ul class="pcol-items">
+        <li>Impersonation of real public figures</li>
+        <li>Catfishing for scams & social engineering</li>
+        <li>Fake credentials, stolen profile photos</li>
+        <li>Account aging to appear legitimate</li>
+      </ul>
+    </div>
+    <div class="pcol">
+      <div class="pcol-title">Manipulation at Scale</div>
+      <ul class="pcol-items">
+        <li>Artificial trend creation on Twitter/X</li>
+        <li>Fake reviews & rating manipulation</li>
+        <li>Political opinion shaping via bots</li>
+        <li>Coordinated Inauthentic Behavior (CIB)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN POINTS -->
+<div class="divider">
+  <div class="divider-num">03</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Pain Points</div>
+</div>
+
+<section id="pain">
+  <div class="section-label">Who Suffers</div>
+  <h2 class="section-title">Everyone pays the<br/>price — <em>differently</em></h2>
+
+  <div class="pain-grid">
+    <div class="pain-card" id="pc1">
+      <div class="pain-who">Ordinary Users</div>
+      <ul class="pain-list">
+        <li>Harassed or impersonated by fake profiles</li>
+        <li>Misled by fake reviews and viral misinformation</li>
+        <li>Friends' accounts cloned for scams</li>
+        <li>No trusted place to officially report fake accounts</li>
+      </ul>
+    </div>
+    <div class="pain-card" id="pc2">
+      <div class="pain-who">Businesses & Creators</div>
+      <ul class="pain-list">
+        <li>Ad budgets drained by bot impressions</li>
+        <li>Fake negative reviews damage reputation</li>
+        <li>Engagement metrics are meaningless</li>
+        <li>Cannot verify authenticity of their own audience</li>
+      </ul>
+    </div>
+    <div class="pain-card" id="pc3">
+      <div class="pain-who">Government & Regulators</div>
+      <ul class="pain-list">
+        <li>No centralized data on fake account activity</li>
+        <li>Platforms uncooperative with disclosures</li>
+        <li>Election manipulation via coordinated bot campaigns</li>
+        <li>Reactive approach — no proactive detection</li>
+      </ul>
+    </div>
+    <div class="pain-card" id="pc4">
+      <div class="pain-who">The Platforms Themselves</div>
+      <ul class="pain-list">
+        <li>Internal moderation is opaque and inconsistent</li>
+        <li>Public trust erodes due to bot prevalence</li>
+        <li>Regulatory pressure increasing (EU DSA, India IT Rules)</li>
+        <li>No third-party verification or audit mechanism</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- EXISTING SYSTEMS -->
+<div class="divider">
+  <div class="divider-num">04</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Existing Systems & Failures</div>
+</div>
+
+<section id="existing">
+  <div class="section-label">What's Out There</div>
+  <h2 class="section-title">Five systems.<br/><em>Five critical gaps.</em></h2>
+
+  <div class="systems-table">
+    <div class="systems-header">
+      <span>System</span>
+      <span>Approach</span>
+      <span>Critical Limitation</span>
+    </div>
+    <div class="systems-row">
+      <div class="sys-name">Meta / Instagram Internal AI</div>
+      <div class="sys-approach">Pattern detection on their own data; removes accounts that violate ToS.</div>
+      <div class="sys-fail"><span class="warn">⚠</span>Proprietary and black-box. No external audit. Inconsistent enforcement. Reactive, not proactive.</div>
+    </div>
+    <div class="systems-row">
+      <div class="sys-name">Twitter/X Account Verification</div>
+      <div class="sys-approach">Blue tick paid subscription; heuristic bot scoring internally.</div>
+      <div class="sys-fail"><span class="warn">⚠</span>Pay-to-appear-legit model. Paid ticks given to obvious bots. No actual identity verification.</div>
+    </div>
+    <div class="systems-row">
+      <div class="sys-name">Botometer (Indiana Univ.)</div>
+      <div class="sys-approach">ML-based public Twitter bot scoring via API.</div>
+      <div class="sys-fail"><span class="warn">⚠</span>Twitter-only. No reporting pipeline. Academic tool — no enforcement. No government linkage.</div>
+    </div>
+    <div class="systems-row">
+      <div class="sys-name">Spam Detection (Google, Apple)</div>
+      <div class="sys-approach">Email and SMS spam filters using ML classification.</div>
+      <div class="sys-fail"><span class="warn">⚠</span>Narrow scope — not designed for social profiles. No user-driven reporting. No cross-platform view.</div>
+    </div>
+    <div class="systems-row">
+      <div class="sys-name">CERT-In / National Cybercrime Portal</div>
+      <div class="sys-approach">Accept cybercrime reports including impersonation.</div>
+      <div class="sys-fail"><span class="warn">⚠</span>General-purpose, not social media specific. No ML scoring. No structured fake account workflow.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFFERENTIATOR -->
+<div class="divider">
+  <div class="divider-num">05</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Where FakeShield Stands Out</div>
+</div>
+
+<section id="differentiator">
+  <div class="section-label">Comparison</div>
+  <h2 class="section-title">Every dimension,<br/><em>reimagined</em></h2>
+
+  <div class="compare-table">
+    <div class="compare-header">
+      <span>Dimension</span>
+      <span>Existing Systems</span>
+      <span>FakeShield</span>
+    </div>
+    <div class="compare-row">
+      <div>Scope</div>
+      <div class="bad">Single platform only</div>
+      <div class="good">Platform-agnostic — any social media</div>
+    </div>
+    <div class="compare-row">
+      <div>Transparency</div>
+      <div class="bad">Black-box, no audit trail</div>
+      <div class="good">Blockchain-backed immutable log</div>
+    </div>
+    <div class="compare-row">
+      <div>Enforcement</div>
+      <div class="bad">Platform decides (conflict of interest)</div>
+      <div class="good">Independent government agency verifies</div>
+    </div>
+    <div class="compare-row">
+      <div>Detection Method</div>
+      <div class="bad">Heuristics / proprietary ML</div>
+      <div class="good">Open, explainable Random Forest scoring</div>
+    </div>
+    <div class="compare-row">
+      <div>User Reporting</div>
+      <div class="bad">Buried in-app button, no follow-up</div>
+      <div class="good">Structured portal with case tracking & status</div>
+    </div>
+    <div class="compare-row">
+      <div>Accountability</div>
+      <div class="bad">No external oversight</div>
+      <div class="good">Gov analysts + blockchain verdict log</div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<div class="divider">
+  <div class="divider-num">06</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Purpose & Vision</div>
+</div>
+
+<section id="vision">
+  <div class="section-label">Mission Statement</div>
+  <h2 class="section-title">Technology-driven,<br/><em>government-backed</em> accountability</h2>
+
+  <div class="mission-block">
+    <p class="mission-text">To create a <em>transparent, technology-driven, government-backed platform</em> that empowers citizens to report fake accounts and gives regulatory agencies the tools to act — making social media safer and more accountable.</p>
+  </div>
+
+  <div class="vision-cols">
+    <div class="vision-card" id="vc1">
+      <div class="vision-icon">◎</div>
+      <div class="vision-title">Empower Citizens</div>
+      <p class="vision-desc">Give ordinary users a meaningful, tracked reporting channel — not just a button that disappears into a void.</p>
+    </div>
+    <div class="vision-card" id="vc2">
+      <div class="vision-icon">⬡</div>
+      <div class="vision-title">Enable Gov Action</div>
+      <p class="vision-desc">Arm cybercrime and regulatory agencies with structured, ML-enriched data to take informed action.</p>
+    </div>
+    <div class="vision-card" id="vc3">
+      <div class="vision-icon">◈</div>
+      <div class="vision-title">Restore Accountability</div>
+      <p class="vision-desc">Remove the conflict-of-interest where platforms self-police. An independent layer that platforms can't suppress.</p>
+    </div>
+    <div class="vision-card" id="vc4">
+      <div class="vision-icon">⬟</div>
+      <div class="vision-title">Build Digital Trust</div>
+      <p class="vision-desc">Long-term: restore confidence in social media engagement so people know what they see is real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GAP -->
+<div class="divider">
+  <div class="divider-num">07</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">The Gap We Fill</div>
+</div>
+
+<section id="gap">
+  <div class="section-label">Before & After</div>
+  <h2 class="section-title">From void<br/>to <em>accountability</em></h2>
+
+  <div class="gap-layout">
+    <div class="gap-col current">
+      <div class="gap-title">Current State</div>
+      <div class="gap-item">Platforms self-regulate (conflict of interest)</div>
+      <div class="gap-item">No cross-platform detection</div>
+      <div class="gap-item">Users have no voice or tracking</div>
+      <div class="gap-item">No government data or oversight</div>
+      <div class="gap-item">Blockchain / audit trail: absent</div>
+      <div class="gap-item">ML scoring: proprietary / unavailable</div>
+    </div>
+    <div class="gap-arrow">
+      <div class="gap-arrow-inner">FakeShield fills this →</div>
+    </div>
+    <div class="gap-col solution">
+      <div class="gap-title" style="color:var(--gray-light)">FakeShield Solution</div>
+      <div class="gap-item">Independent, government-backed authority</div>
+      <div class="gap-item">Works across all social platforms</div>
+      <div class="gap-item">Public reporting portal with case tracking</div>
+      <div class="gap-item">ML score + structured data for agencies</div>
+      <div class="gap-item">Blockchain: every action immutably logged</div>
+      <div class="gap-item">Open, explainable AI — no black box</div>
+    </div>
+  </div>
+
+  <div class="closing-line">
+    <p>FakeShield doesn't compete with platforms — it <em>holds them accountable.</em></p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">Fake<em>Shield</em></div>
+  <div class="footer-meta">
+    Problem Definition Deck<br/>
+    FakeShield · Minor Project<br/>
+    Fake Account Detection System
+  </div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section, .scale-cell, .platform-row, .pain-card, .vision-card').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.vision-card').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+</script>
+
+<script>
+// Scroll progress
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // Intersection Observer for section reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section, .stat-cell, .feature-item, .wf-step, .conclusion-item').forEach(el => io.observe(el));
+
+  // Metric cards flip animation
+  const metricObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('animate'), 300);
+        setTimeout(() => e.target.classList.remove('animate'), 1300);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  ['m1','m2','m3','m4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.transitionDelay = (i * 0.15) + 's';
+      metricObs.observe(el);
+    }
+  });
+
+  // Feature items stagger
+  document.querySelectorAll('.feature-item').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.08) + 's';
+  });
+
+  // Conclusion items stagger
+  document.querySelectorAll('.conclusion-item').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+</script>
+</body>
+</html>

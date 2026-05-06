@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FakeShield — Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --warm: #ede7d9;
+    --vermillion: #c0392b;
+    --vermillion-light: #e8453c;
+    --gold: #b8860b;
+    --gray: #7a756e;
+    --gray-light: #c4bdb2;
+    --border: #d4cbbf;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Cormorant Garamond', 'Noto Serif', serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE TEXTURE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #progress {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: var(--vermillion);
+    z-index: 1000;
+    transition: width 0.1s;
+    width: 0%;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-brand span { color: var(--vermillion); }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 4rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--serif);
+    font-size: clamp(12rem, 22vw, 28rem);
+    font-weight: 700;
+    color: rgba(15,14,12,0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: -0.05em;
+    animation: floatBg 8s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes floatBg {
+    0%,100% { transform: translate(-50%,-50%) scale(1); }
+    50% { transform: translate(-50%,-52%) scale(1.01); }
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(4rem, 9vw, 9rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--vermillion);
+  }
+  .hero-sub {
+    margin-top: 2rem;
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--gray);
+    max-width: 520px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+  .hero-tags {
+    margin-top: 3rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    color: var(--gray);
+    background: transparent;
+  }
+  .tag.accent { border-color: var(--vermillion); color: var(--vermillion); }
+
+  .hero-scroll {
+    position: absolute; bottom: 3rem; right: 4rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--gray-light), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0.4; transform: scaleY(0.6); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    display: flex; align-items: center; gap: 2rem;
+    margin: 0 4rem;
+    padding: 4rem 0 3rem;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    white-space: nowrap;
+  }
+  .divider-num {
+    font-family: var(--serif);
+    font-size: 0.9rem;
+    color: var(--vermillion);
+    font-style: italic;
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 6rem 4rem;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 3rem;
+  }
+  .section-title em { font-style: italic; color: var(--vermillion); }
+
+  /* ─── PROBLEM STATS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+    overflow: hidden;
+  }
+  .stat-cell {
+    padding: 2.5rem 2rem;
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-cell::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0; height: 2px;
+    background: var(--vermillion);
+    transition: width 1s ease;
+  }
+  .stat-cell.visible::after { width: 100%; }
+  .stat-num {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+    font-style: italic;
+  }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .problem-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .problem-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    background: var(--warm);
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .problem-card:hover {
+    border-color: var(--vermillion);
+    box-shadow: 4px 4px 0 var(--vermillion);
+    transform: translate(-2px, -2px);
+    transition: all 0.2s;
+  }
+  .problem-card h3 {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+    color: var(--ink);
+  }
+  .problem-card p {
+    font-size: 0.95rem;
+    color: var(--gray);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  .card-index {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--vermillion);
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  /* ─── SOLUTION ─── */
+  .solution-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .solution-col {
+    background: var(--paper);
+    padding: 2.5rem 2rem;
+    position: relative;
+  }
+  .sol-icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+    color: var(--vermillion);
+    font-size: 1rem;
+  }
+  .sol-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  .sol-steps {
+    list-style: none;
+    font-size: 0.9rem;
+    color: var(--gray);
+    font-weight: 300;
+    font-family: var(--mono);
+  }
+  .sol-steps li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .sol-steps li:last-child { border-bottom: none; }
+  .sol-steps li::before {
+    content: '→ ';
+    color: var(--vermillion);
+  }
+
+  /* ─── ARCHITECTURE FLOW ─── */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow: hidden;
+    margin-bottom: 4rem;
+    flex-wrap: wrap;
+    row-gap: 2rem;
+  }
+  .arch-node {
+    flex: 1;
+    min-width: 120px;
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    background: var(--paper);
+    position: relative;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .arch-node:hover {
+    background: var(--warm);
+    border-color: var(--ink);
+  }
+  .arch-node.highlight {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .arch-node.highlight .node-label { color: var(--paper); }
+  .arch-node.highlight .node-sub { color: var(--gray-light); }
+  .node-icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .node-label {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .node-sub {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    margin-top: 0.25rem;
+  }
+  .arch-arrow {
+    font-family: var(--mono);
+    color: var(--vermillion);
+    font-size: 1.2rem;
+    padding: 0 0.5rem;
+    flex-shrink: 0;
+    animation: arrowPulse 2s ease-in-out infinite;
+  }
+  @keyframes arrowPulse {
+    0%,100% { opacity: 1; transform: translateX(0); }
+    50% { opacity: 0.5; transform: translateX(4px); }
+  }
+
+  .tech-stack {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .tech-item {
+    padding: 1.5rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .tech-item:hover { background: var(--warm); }
+  .tech-item:nth-child(4n) { border-right: none; }
+  .tech-item:nth-last-child(-n+4) { border-bottom: none; }
+  .tech-cat {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--vermillion);
+    margin-bottom: 0.5rem;
+  }
+  .tech-name {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+  .tech-detail {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--gray);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+  }
+
+  /* ─── ML FEATURES ─── */
+  .features-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .feature-list { list-style: none; }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .feature-item.visible { opacity: 1; transform: translateX(0); }
+  .feature-check {
+    color: var(--vermillion);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+  }
+  .feature-text {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+
+  /* ─── METRICS ─── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .metric-card {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 100%;
+    height: 0;
+    background: var(--ink);
+    transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  .metric-card.animate::before { height: 100%; }
+  .metric-value {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+    position: relative; z-index: 1;
+    transition: color 1s;
+    display: block;
+  }
+  .metric-card.animate .metric-value { color: var(--paper); }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    position: relative; z-index: 1;
+    transition: color 1s;
+  }
+  .metric-card.animate .metric-label { color: var(--gray-light); }
+
+  .risk-labels {
+    display: flex;
+    gap: 0;
+    margin-top: 1.5rem;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .risk-tag {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-right: 1px solid var(--border);
+  }
+  .risk-tag:last-child { border-right: none; }
+  .risk-tag.low { background: rgba(46,125,50,0.08); color: #2e7d32; }
+  .risk-tag.mid { background: rgba(184,134,11,0.08); color: var(--gold); }
+  .risk-tag.high { background: rgba(192,57,43,0.08); color: var(--vermillion); }
+
+  /* ─── BLOCKCHAIN ─── */
+  .blockchain-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .bc-cell {
+    background: var(--paper);
+    padding: 2.5rem 2rem;
+    transition: background 0.3s;
+  }
+  .bc-cell:hover { background: var(--warm); }
+  .bc-num {
+    font-family: var(--serif);
+    font-size: 3rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--border);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .bc-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+  .bc-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.6;
+  }
+
+  /* ─── WORKFLOW ─── */
+  .workflow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .wf-step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .wf-step:last-child { border-bottom: none; }
+  .wf-num {
+    background: var(--warm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--border);
+    border-right: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .wf-num::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 3px;
+    background: var(--vermillion);
+    transition: width 0.8s ease;
+  }
+  .wf-step.visible .wf-num::after { width: 100%; }
+  .wf-content {
+    padding: 1.5rem 2rem;
+    background: var(--paper);
+    transition: background 0.2s;
+  }
+  .wf-step:hover .wf-content { background: var(--warm); }
+  .wf-title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .wf-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+  }
+
+  .features-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-top: 3rem;
+  }
+
+  /* ─── IMPACT ─── */
+  .impact-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 4rem;
+    overflow: hidden;
+  }
+  .impact-col {
+    background: var(--paper);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+  .impact-col:hover { background: var(--ink); }
+  .impact-col:hover .impact-title { color: var(--paper); }
+  .impact-col:hover .impact-desc { color: var(--gray-light); }
+  .impact-col:hover .impact-icon { color: var(--vermillion-light); }
+  .impact-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    transition: color 0.3s;
+  }
+  .impact-title {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    transition: color 0.3s;
+  }
+  .impact-desc {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--gray);
+    transition: color 0.3s;
+  }
+
+  .conclusion-list { list-style: none; margin-top: 2rem; }
+  .conclusion-item {
+    display: flex; gap: 1.5rem; align-items: flex-start;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--gray);
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .conclusion-item.visible { opacity: 1; transform: translateY(0); }
+  .conclusion-item span:first-child {
+    color: var(--vermillion);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 4rem;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .footer-brand {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .footer-brand em { color: var(--vermillion); font-style: normal; }
+  .footer-meta {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--gray-light);
+    text-align: right;
+    line-height: 2;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    #hero, section { padding: 4rem 1.5rem; }
+    .stats-grid, .problem-cards, .solution-grid, .features-layout,
+    .metrics-grid, .blockchain-grid, .impact-row, .tech-stack { grid-template-columns: 1fr; }
+    .arch-flow { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); }
+    footer { flex-direction: column; gap: 2rem; }
+    .footer-meta { text-align: left; }
+    .divider { margin: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<nav>
+  <a class="nav-brand" href="#hero">Fake<span>Shield</span></a>
+  <div class="nav-links">
+    <a href="#problem">Problem</a>
+    <a href="#solution">Solution</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#ml">ML Model</a>
+    <a href="#blockchain">Blockchain</a>
+    <a href="#workflow">Workflow</a>
+    <a href="#impact">Impact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero" style="opacity:1;transform:none;padding-bottom:6rem;">
+  <div class="hero-bg-text">FS</div>
+  <div class="hero-eyebrow">Minor Project Presentation · Fake Account Detection</div>
+  <h1 class="hero-title">Fake<em>Shield</em></h1>
+  <p class="hero-sub">A centralized web portal with ML scoring and Blockchain-backed verification for fake account detection across social platforms.</p>
+  <div class="hero-tags">
+    <span class="tag accent">ML · Random Forest</span>
+    <span class="tag">MERN Stack</span>
+    <span class="tag">Blockchain · Hardhat</span>
+    <span class="tag">Solidity · Ethereum</span>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<div class="divider">
+  <div class="divider-num">01</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Problem Statement</div>
+</div>
+
+<section id="problem">
+  <div class="section-label">The Scale</div>
+  <h2 class="section-title">Fake accounts aren't<br/>a nuisance — <em>they're a threat</em></h2>
+
+  <div class="stats-grid">
+    <div class="stat-cell">
+      <div class="stat-num">15%</div>
+      <div class="stat-label">Avg. fake accounts<br/>on social platforms</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">95M</div>
+      <div class="stat-label">Fake accounts removed<br/>by Facebook per quarter</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">5–10%</div>
+      <div class="stat-label">Twitter/X bots among<br/>active users</div>
+    </div>
+  </div>
+
+  <div class="problem-cards">
+    <div class="problem-card">
+      <div class="card-index">01 / 04</div>
+      <h3>Bot Networks</h3>
+      <p>Automated bots inflate engagement — fake likes, comments, trending topics — operating in coordinated networks that evade basic rate-limit checks.</p>
+    </div>
+    <div class="problem-card">
+      <div class="card-index">02 / 04</div>
+      <h3>Impersonation</h3>
+      <p>Fake profiles impersonate real public figures to spread misinformation, facilitate scams, and deploy stolen profile photos aged to appear legitimate.</p>
+    </div>
+    <div class="problem-card">
+      <div class="card-index">03 / 04</div>
+      <h3>Platform Limitations</h3>
+      <p>Platform-native detection is proprietary, inconsistent, and non-transparent — a black box with no external audit or independent enforcement.</p>
+    </div>
+    <div class="problem-card">
+      <div class="card-index">04 / 04</div>
+      <h3>No Central Authority</h3>
+      <p>No government body has oversight or enforcement power. Users have no meaningful reporting channel — just a button that disappears into a void.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<div class="divider">
+  <div class="divider-num">02</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Our Solution</div>
+</div>
+
+<section id="solution">
+  <div class="section-label">Architecture Overview</div>
+  <h2 class="section-title">ML scoring + <em>Blockchain</em><br/>verification, unified</h2>
+
+  <div class="solution-grid">
+    <div class="solution-col">
+      <div class="sol-icon">⬡</div>
+      <div class="sol-title">ML Scoring</div>
+      <ul class="sol-steps">
+        <li>User submits profile data</li>
+        <li>Random Forest scores fakeness probability</li>
+        <li>Risk label: Low / Medium / High</li>
+      </ul>
+    </div>
+    <div class="solution-col">
+      <div class="sol-icon">◈</div>
+      <div class="sol-title">Report Portal</div>
+      <ul class="sol-steps">
+        <li>Public web portal — anyone can submit</li>
+        <li>Report tracked with status updates</li>
+        <li>Role-based access: public + agency</li>
+      </ul>
+    </div>
+    <div class="solution-col">
+      <div class="sol-icon">⬟</div>
+      <div class="sol-title">Gov Agency Verification</div>
+      <ul class="sol-steps">
+        <li>Secure dashboard for analysts</li>
+        <li>Manual review + blockchain audit log</li>
+        <li>Final verdict: Fake / Genuine / Inconclusive</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<div class="divider">
+  <div class="divider-num">03</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">System Architecture</div>
+</div>
+
+<section id="architecture">
+  <div class="section-label">Data Flow</div>
+  <h2 class="section-title">Five-layer <em>stack</em>,<br/>end-to-end</h2>
+
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="node-icon">👤</div>
+      <div class="node-label">User</div>
+      <div class="node-sub">Submit Profile</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="node-icon">⬡</div>
+      <div class="node-label">React Frontend</div>
+      <div class="node-sub">Public Portal</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node highlight">
+      <div class="node-icon">⚙</div>
+      <div class="node-label">Node.js Backend</div>
+      <div class="node-sub">Express + MongoDB</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="node-icon">🧠</div>
+      <div class="node-label">ML Engine</div>
+      <div class="node-sub">Random Forest / Flask</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="node-icon">⛓</div>
+      <div class="node-label">Blockchain</div>
+      <div class="node-sub">Hardhat · Solidity</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="node-icon">🏛</div>
+      <div class="node-label">Agency Dashboard</div>
+      <div class="node-sub">Gov Analysts</div>
+    </div>
+  </div>
+
+  <div class="tech-stack">
+    <div class="tech-item">
+      <div class="tech-cat">Frontend</div>
+      <div class="tech-name">React.js</div>
+      <div class="tech-detail">Tailwind CSS · Axios</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-cat">Backend</div>
+      <div class="tech-name">Node.js</div>
+      <div class="tech-detail">Express.js · MongoDB · JWT Auth</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-cat">ML Engine</div>
+      <div class="tech-name">Python</div>
+      <div class="tech-detail">Scikit-learn · Random Forest · Flask API</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-cat">Blockchain</div>
+      <div class="tech-name">Solidity</div>
+      <div class="tech-detail">Smart Contracts · Hardhat · Ethers.js</div>
+    </div>
+  </div>
+</section>
+
+<!-- ML MODEL -->
+<div class="divider">
+  <div class="divider-num">04</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">ML Model</div>
+</div>
+
+<section id="ml">
+  <div class="section-label">Random Forest Classifier</div>
+  <h2 class="section-title">Input features &<br/><em>92% accuracy</em></h2>
+
+  <div class="features-layout">
+    <div>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Profile completeness score</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Account age vs. activity ratio</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Follower / Following ratio</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Post frequency & engagement rate</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Profile picture analysis (present/default)</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Username pattern (random chars, numbers)</span>
+        </li>
+        <li class="feature-item">
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Bio length & keyword flags</span>
+        </li>
+      </ul>
+      <div style="margin-top:1.5rem;padding:1rem;border:1px solid var(--border);background:var(--warm);">
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--vermillion);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem;">Dataset Source</div>
+        <div style="font-size:0.9rem;font-weight:300;color:var(--gray);">Kaggle datasets — Instagram, Facebook, X (Twitter) · Per-platform models trained individually · Scraper API for live account retrieval from URL</div>
+      </div>
+    </div>
+    <div>
+      <div class="metrics-grid">
+        <div class="metric-card" id="m1">
+          <span class="metric-value">92%</span>
+          <div class="metric-label">Accuracy</div>
+        </div>
+        <div class="metric-card" id="m2">
+          <span class="metric-value">89%</span>
+          <div class="metric-label">Precision</div>
+        </div>
+        <div class="metric-card" id="m3">
+          <span class="metric-value">91%</span>
+          <div class="metric-label">Recall</div>
+        </div>
+        <div class="metric-card" id="m4">
+          <span class="metric-value">90%</span>
+          <div class="metric-label">F1 Score</div>
+        </div>
+      </div>
+      <div class="risk-labels">
+        <div class="risk-tag low">Low Risk</div>
+        <div class="risk-tag mid">Medium Risk</div>
+        <div class="risk-tag high">High Risk</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCKCHAIN -->
+<div class="divider">
+  <div class="divider-num">05</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Blockchain Layer</div>
+</div>
+
+<section id="blockchain">
+  <div class="section-label">Hardhat · Solidity · Ethereum</div>
+  <h2 class="section-title">Immutable audit.<br/><em>Tamper-proof</em> records.</h2>
+
+  <div class="blockchain-grid">
+    <div class="bc-cell">
+      <div class="bc-num">I</div>
+      <div class="bc-title">Immutable Audit Log</div>
+      <p class="bc-desc">Every report submission and agency verdict is hashed on-chain. Cannot be altered retroactively — the chain is the source of truth.</p>
+    </div>
+    <div class="bc-cell">
+      <div class="bc-num">II</div>
+      <div class="bc-title">Tamper-Proof Records</div>
+      <p class="bc-desc">Smart contracts enforce submission rules. No single party can modify verdicts post-submission. Code is law.</p>
+    </div>
+    <div class="bc-cell">
+      <div class="bc-num">III</div>
+      <div class="bc-title">Decentralized Trust</div>
+      <p class="bc-desc">No central database holds the truth — the chain is the record, transparent to all authorized parties. No single point of failure or manipulation.</p>
+    </div>
+    <div class="bc-cell">
+      <div class="bc-num">IV</div>
+      <div class="bc-title">Gov Accountability</div>
+      <p class="bc-desc">Agency actions are permanently logged, creating accountability and enabling dispute resolution. Removes the conflict-of-interest of self-policing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<div class="divider">
+  <div class="divider-num">06</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">User Workflow</div>
+</div>
+
+<section id="workflow">
+  <div class="section-label">Five-step Process</div>
+  <h2 class="section-title">From submission<br/>to <em>blockchain verdict</em></h2>
+
+  <div class="workflow-steps">
+    <div class="wf-step" id="ws1">
+      <div class="wf-num">01</div>
+      <div class="wf-content">
+        <div class="wf-title">Submit Profile</div>
+        <p class="wf-desc">User enters a social media profile URL or handle on the public portal. Works across Instagram, Facebook, and X.</p>
+      </div>
+    </div>
+    <div class="wf-step" id="ws2">
+      <div class="wf-num">02</div>
+      <div class="wf-content">
+        <div class="wf-title">ML Scoring</div>
+        <p class="wf-desc">Scraper API fetches live account features. Random Forest model returns a fakeness probability and risk label.</p>
+      </div>
+    </div>
+    <div class="wf-step" id="ws3">
+      <div class="wf-num">03</div>
+      <div class="wf-content">
+        <div class="wf-title">File Report</div>
+        <p class="wf-desc">User reviews the ML score and submits a formal report with supporting evidence through the portal.</p>
+      </div>
+    </div>
+    <div class="wf-step" id="ws4">
+      <div class="wf-num">04</div>
+      <div class="wf-content">
+        <div class="wf-title">Agency Review</div>
+        <p class="wf-desc">A government analyst reviews the case in a secure, role-authenticated dashboard with ML-enriched data.</p>
+      </div>
+    </div>
+    <div class="wf-step" id="ws5">
+      <div class="wf-num">05</div>
+      <div class="wf-content">
+        <div class="wf-title">Blockchain Log</div>
+        <p class="wf-desc">The final verdict — Fake / Genuine / Inconclusive — is recorded on-chain. Tamper-proof, permanent, auditable.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="features-tags">
+    <span class="tag">Role-based Auth</span>
+    <span class="tag">JWT + Bcrypt</span>
+    <span class="tag">Real-time Status</span>
+    <span class="tag">CSV Export</span>
+    <span class="tag accent">Admin Analytics Dashboard</span>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<div class="divider">
+  <div class="divider-num">07</div>
+  <div class="divider-line"></div>
+  <div class="divider-label">Impact & Conclusion</div>
+</div>
+
+<section id="impact">
+  <div class="section-label">Why It Matters</div>
+  <h2 class="section-title">Digital accountability,<br/><em>finally</em></h2>
+
+  <div class="impact-row">
+    <div class="impact-col">
+      <div class="impact-icon">◎</div>
+      <div class="impact-title">Centralized</div>
+      <p class="impact-desc">Single authority for fake account oversight — independent of platform conflicts of interest.</p>
+    </div>
+    <div class="impact-col">
+      <div class="impact-icon">⬡</div>
+      <div class="impact-title">Transparent</div>
+      <p class="impact-desc">Blockchain-backed immutable records — no black box, no opaque enforcement.</p>
+    </div>
+    <div class="impact-col">
+      <div class="impact-icon">◈</div>
+      <div class="impact-title">Scalable</div>
+      <p class="impact-desc">Platform-agnostic architecture that works across all social media — not just one network.</p>
+    </div>
+  </div>
+
+  <ul class="conclusion-list">
+    <li class="conclusion-item" id="ci1">
+      <span>›</span>
+      <span>FakeShield bridges the gap between social platforms and regulatory enforcement — an independent layer platforms cannot suppress.</span>
+    </li>
+    <li class="conclusion-item" id="ci2">
+      <span>›</span>
+      <span>ML scoring provides objective, data-driven profiling with 92%+ accuracy across platform-specific models trained on Kaggle datasets.</span>
+    </li>
+    <li class="conclusion-item" id="ci3">
+      <span>›</span>
+      <span>Blockchain ensures no manipulation of reports or verdicts by any party — government agencies gain a structured, transparent tool.</span>
+    </li>
+    <li class="conclusion-item" id="ci4">
+      <span>›</span>
+      <span>Future scope: API integration with platforms, NLP-based content analysis, mobile app for citizen reporting.</span>
+    </li>
+  </ul>
+</section>
+
+<footer>
+  <div class="footer-brand">Fake<em>Shield</em></div>
+  <div class="footer-meta">
+    Minor Project Presentation<br/>
+    ML · Blockchain · MERN Stack<br/>
+    Random Forest · Hardhat · Solidity
+  </div>
+</footer>
+
+<script>
+  // Scroll progress
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (window.scrollY / (h.scrollHeight - h.clientHeight)) * 100;
+    document.getElementById('progress').style.width = pct + '%';
+  });
+
+  // Intersection Observer for section reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section, .stat-cell, .feature-item, .wf-step, .conclusion-item').forEach(el => io.observe(el));
+
+  // Metric cards flip animation
+  const metricObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('animate'), 300);
+        setTimeout(() => e.target.classList.remove('animate'), 1300);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  ['m1','m2','m3','m4'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.transitionDelay = (i * 0.15) + 's';
+      metricObs.observe(el);
+    }
+  });
+
+  // Feature items stagger
+  document.querySelectorAll('.feature-item').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.08) + 's';
+  });
+
+  // Conclusion items stagger
+  document.querySelectorAll('.conclusion-item').forEach((el, i) => {
+    el.style.transitionDelay = (i * 0.1) + 's';
+  });
+</script>
+</body>
+</html>
